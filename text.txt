@@ -1,0 +1,13 @@
+type =“stock” 
+symbol= “ACL”
+name= “ACLL Toronto”
+quantity = “10”
+price = “100.0”
+bookValue= “990.01”
+
+type =“mutualfund” 
+symbol= “ACL”
+name= “ACLL Bank”
+quantity = “10”
+price = “100.0”
+bookValue= “990.01”

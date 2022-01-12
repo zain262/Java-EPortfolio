@@ -1,0 +1,618 @@
+import java.util.Scanner;
+import java.util.ArrayList;
+import java.lang.String;
+import java.io.PrintWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileNotFoundException;
+import java.lang.Boolean;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+
+
+public class Main {
+    private JFrame mainWindow;
+    public static void main(String args[]) {
+        
+
+        ArrayList < Investment > investments = new ArrayList < Investment > ();
+        //Initlize array lists to store the investments
+        HashMap<String, ArrayList<Integer>> investNames = new HashMap<String, ArrayList<Integer>>();
+
+        boolean Loop = true;
+        while (Loop) {
+          Scanner sc = new Scanner(System.in);
+            System.out.print("Please type any one of these commands: buy, sell, update, getGain, search, and quit.\n");
+            System.out.print("buy: own a new investment or add more quantity to an existing investment\n");
+            System.out.print("sell: reduce some quantity of an existing investment.\n");
+            System.out.print("update: refresh the prices of all existing investment\n");
+            System.out.print("getGain: compute the total gain of the portfolio by accumulating the gains of all individual investments\n");
+            System.out.print("search: find all investments that match a search request and display all attributes of these investments.\n");
+            //Display options to the user
+            String input;
+
+            input = sc.nextLine();
+            //Get users input
+          /*
+          If quit or q is entered by the user exit loop and end program
+          */
+            if (input.equalsIgnoreCase("quit") || input.equalsIgnoreCase("q")) {
+                Loop = false;
+                //If user enters quit exit the loop and end program
+            }
+          /*
+          ask user weather they would like to buy a mutual 
+          fund or stock. Next it is checked if the arryalist is empty or not; if it is empty then user is 
+          asked for a symbol for the investment and then a new element is created If arraylist is not 
+          empty then the user is asked for a symbol and the arraylist is searched for a matching symbol 
+          if a match is found then add more qunatity to that investment. If a match is not found it is 
+          treated like the list is empty and new element is created
+          */
+            if (input.equalsIgnoreCase("buy")) {
+                //If the user enters buy ask which kind of investment
+                System.out.print("Please type the kind of investment(either stock or mutualfund)\n");
+                String investment;
+                investment = sc.nextLine();
+                if (investment.equalsIgnoreCase("stock")) {
+                    //If user chooses to buy a stock check if the array list is empty
+                    if (investments.isEmpty()) {
+                        //If it is empty create a new stock variable
+                        String name;
+                        System.out.print("Please type the symbol of your stock\n");
+                        name = sc.nextLine();
+                        Stock holder = new Stock();
+                        holder.newInvestment(name);
+                        //Get user to enter all attributes for the stock
+                        String Name;
+                        Name=holder.getName();
+                        String[] parts = Name.split("[,. ;:/]+");
+                        for (int i=0;i<parts.length;i++)
+                        { 
+                          String partsLow=parts[i].toLowerCase();
+                          investNames.put(partsLow,new ArrayList<Integer>()); 
+                          ArrayList<Integer> list=investNames.get(partsLow); 
+                          list.add(0); 
+                          investNames.put(partsLow,list);
+
+                        }
+                       
+                        investments.add(holder);
+                        //Add it to the arraylist
+
+                    } else {
+                        //If the arraylist is not empty ask the user to enter the symbol of investment
+                        String name;
+                        System.out.print("Please type the symbol of your stock\n");
+                        name = sc.nextLine();
+                        int posHolder = 0;
+                        boolean found = false;
+                        //Loop through the arraylist and check if a investment with the symbol already exists
+                        for (int i = 0; i < investments.size(); i++) {
+                            if (name.equals(investments.get(i).getSymbol()) == true) {
+                                found = true;
+                                posHolder = i;
+                                //If a investment exists then save its index
+                            }
+                        }
+                        if (found) {
+                            if (investments.get(posHolder) instanceof Stock)
+                            {
+                            investments.get(posHolder).addInvestment();
+                            //Add more quantity to the investment
+                            }
+                            else
+                            {
+                              System.out.print("A mutualfund with this symbol already exists\n");
+                            }
+                        } else {
+                            Stock temp = new Stock();
+                            temp.newInvestment(name);
+                            String Name;
+                            Name=temp.getName();
+                            String[] parts = Name.split("[,. ;:/]+");
+                        for (int i=0;i<parts.length;i++)
+                        {
+                          String partsLow=parts[i].toLowerCase();
+                          if (investNames.containsKey(partsLow))
+                          {
+                            ArrayList<Integer> list=investNames.get(partsLow);
+                            list.add(investments.size());
+                            investNames.put(partsLow,list);
+                          }
+                          else
+                          {
+                          investNames.put(partsLow,new ArrayList<Integer>()); 
+                          ArrayList<Integer> list=investNames.get(partsLow); 
+                          list.add(investments.size()); 
+                          investNames.put(partsLow,list); 
+                          }
+                          
+                        }
+                            investments.add(temp);
+                            //If investment doesnt exist then create a new one
+                        }
+                    }
+                } else if (investment.equalsIgnoreCase("mutualfund")) {
+                    //If the user chooses mutual funds check if the array list is empty
+                    if (investments.isEmpty()) {
+                        //If it is empty create a new mutualfund variable
+                        String name;
+                        System.out.print("Please type the symbol of your Mutual Fund\n");
+                        name = sc.nextLine();
+                        mutualFund holder = new mutualFund();
+                        //Get user to enter all attributes for the stock
+                        holder.newInvestment(name);
+                      String Name;
+                        Name=holder.getName();
+                        String[] parts = Name.split("[,. ;:/]+");
+                        for (int i=0;i<parts.length;i++)
+                        { 
+                          String partsLow=parts[i].toLowerCase();
+                          investNames.put(partsLow,new ArrayList<Integer>()); 
+                          ArrayList<Integer> list=investNames.get(partsLow); 
+                          list.add(0); 
+                          investNames.put(partsLow,list);
+
+                        }
+                        investments.add(holder);
+                        //Add it to the array list
+                    } else {
+                        //If the arraylist is not empty ask the user to enter the symbol of investment
+                        String name;
+                        System.out.print("Please type the symbol of your Mutual Fund\n");
+                        name = sc.nextLine();
+                        int posHolder = 0;
+                        boolean found = false;
+                        //Loop through the arraylist and check if a investment with the symbol already exists
+                        for (int i = 0; i < investments.size(); i++) {
+
+                            if (name.equals(investments.get(i).getSymbol()) == true) {
+                                found = true;
+                                posHolder = i;
+                                //If a investment exists then save its index
+                            }
+                        }
+                        if (found) {
+                            if (investments.get(posHolder) instanceof mutualFund)
+                            {
+                            investments.get(posHolder).addInvestment();
+                            //Add more quantity to the investment
+                            }
+                            else
+                            {
+                              System.out.print("A stock with this symbol already exists\n");
+                            }
+                      } 
+                      else 
+                      {
+                            mutualFund temp = new mutualFund();
+                            temp.newInvestment(name);
+                            String Name;
+                            Name=temp.getName();
+                            String[] parts = Name.split("[,. ;:/]+");
+                        for (int i=0;i<parts.length;i++)
+                        {
+                          String partsLow=parts[i].toLowerCase();
+                          if (investNames.containsKey(partsLow))
+                          {
+                            ArrayList<Integer> list=investNames.get(partsLow);
+                            list.add(investments.size());
+                            investNames.put(partsLow,list);
+                          }
+                          else
+                          {
+                          investNames.put(partsLow,new ArrayList<Integer>()); 
+                          ArrayList<Integer> list=investNames.get(partsLow); 
+                          list.add(investments.size()); 
+                          investNames.put(partsLow,list); 
+                          }
+                          
+                        }
+                            investments.add(temp);
+                            //If investment doesnt exist then create a new one
+                        }
+                    }
+                }
+            }
+            /*
+            The user is asked to type the symbol of the investment that they would like to 
+            sell both arraylist are searched to find a match, when a match is found sell 
+            function gets called for that investment if the amount they want to sell exceeds 
+            how much they have an error message gets printed, if a user sells all thier 
+            investment the element is deleted from the array list
+            */
+            if (input.equalsIgnoreCase("sell")) {
+                String symbol;
+                System.out.print("Please type the symbol of the investment that you would like to sell\n");
+                symbol = sc.nextLine();
+                //Get the symbol of investment that the user would like to sell
+                boolean match = false;
+                for (int i = 0; i < investments.size(); i++) {
+                    //Loop through the array list to find a investment with the same symbol
+                    if (symbol.equals(investments.get(i).getSymbol()) == true) {
+                        //If a match is found ask user the amount they would like to sell and its price
+                        match = true;
+                        int holder;
+                        holder = investments.get(i).sell();
+                        //If holder is 1 then all the investment has been sold
+                        if (holder == 1) {
+                            System.out.print("Sold All Investment of " + symbol + "\n");
+                            
+                            //Remove investment from the arraylist
+                        String Name;
+                        Name=investments.get(i).getName();
+                        String[] parts = Name.split("[,. ;:/]+");
+                        for (int k=0;k<parts.length;k++)
+                        {
+                          String partsLow=parts[k].toLowerCase();
+                          if (investNames.containsKey(partsLow))
+                          {
+                            ArrayList<Integer> list=investNames.get(partsLow);
+                            for (int x=0;x<list.size();x++)
+                            {
+                            if (list.get(x)==i)
+                            {
+                            list.remove(i);
+                            }
+                            }
+                            if (list.isEmpty())
+                            {
+
+                              investNames.remove(parts[k].toLowerCase());
+                            }
+                            else
+                            {
+                            investNames.put(partsLow,list);
+                            }
+                          }                          
+                        }
+                       Iterator <String> it=investNames.keySet().iterator();
+                       while (it.hasNext())
+                       {
+                         String key=it.next();
+                         ArrayList<Integer> list=investNames.get(key);
+                         for (int x=0;x<list.size();x++)
+                         {
+                           if (list.get(x)>i)
+                           {
+                             list.set(x,list.get(x)-1);
+                           }
+                           investNames.put(key,list);
+                         }
+                       }
+                        investments.remove(i);
+                        }
+                    }
+                }
+                
+                if (!match) {
+                    System.out.print("No match found for " + symbol + "\n");
+                }
+            }
+            /*
+            Two loops going through each arraylist at a time, calling updatePrice function for each investment
+            */
+            if (input.equalsIgnoreCase("update")) {
+                //Go thorugh each array list and ask user to enter a new price for each investment
+                System.out.print("Updating Prices For Mutual Fund\n");
+                for (int i = 0; i < investments.size(); i++) {
+                    investments.get(i).updatePrice();
+                }
+                System.out.print("Updating Prices For Stocks\n");
+
+                for (int i = 0; i < investments.size(); i++) {
+                    investments.get(i).updatePrice();
+                }
+            }
+            /*
+            Two loops going through each arraylist getGain is called for each investment and is added to a sum which is displayed onces each invetsment has been added
+            */
+            if (input.equalsIgnoreCase("getGain")) {
+                //Sum of gain for each investment
+                double sum = 0;
+                for (int i = 0; i < investments.size(); i++) {
+                    sum = sum + investments.get(i).getGain();
+                }
+                System.out.print("Total Gain Is " + sum + "\n");
+            }
+            /*
+            User is asked to enter a symbol, range and key words, then the input is checked if
+            the input is blank then no need to search for that category loop through each array list
+            and each investment and compare until a match is found and display it
+            */
+            if (input.equalsIgnoreCase("search")) {
+              boolean found=false;
+                boolean rangeCheck = true;
+                boolean symbolCheck = true;
+                boolean keyWordCheck = true;
+                //Create variables too check if user entered a blank space
+                String range;
+                double upRange = 0;
+                double botRange = 0;
+                String symbol_;
+                String keyWords;
+                //Create variables for user input
+                System.out.println("Please enter a symbol that you would like to search");
+                //Ask user to enter what symbol they would like to search for
+                symbol_ = sc.nextLine();
+                //Get user input
+                if (symbol_.isEmpty()) {
+                    symbolCheck = false;
+                    //If user enters nothing set symbolCheck to false
+                }
+                System.out.println("Please enter key words that you would like to search");
+                //Ask user to input key words they would like to search for
+                keyWords = sc.nextLine();
+                //Get user input
+                if (keyWords.isEmpty()) {
+                    keyWordCheck = false;
+                    //If user enters nothing set keyWordCheck to false
+                }
+                System.out.println("Please enter a range that you would like to search");
+                //Ask user to input the range they would like to search 
+                range = sc.nextLine();
+                //Get user input
+                if (range.isEmpty()) {
+                    rangeCheck = false;
+                    //If user enters nothing set rangeCheck to false
+                }
+                boolean exact = true;
+                //Create boolean for when the range is just one number
+                if (rangeCheck) {
+                    for (int i = 0; i < range.length(); i++) {
+                        //If there is no "-" assume range is just one number
+                        if (range.charAt(i) == '-') {
+                            exact = false;
+                        }
+                    }
+                    if (exact) {
+                        upRange = Double.parseDouble(range);
+                        botRange = upRange;
+                        //If exact then convert the string into a double
+                    } else if (range.charAt(0) == '-') {
+                        //If the first character is - then assume bottom value is 0
+                        String upRange_ = range.substring(1);
+                        upRange = Double.parseDouble(upRange_);
+                        //Turn everything following the - into a double
+                    } else if (range.charAt(range.length() - 1) == '-') {
+                        //If the last character is - then assume top value is large
+                        String botRange_ = range.substring(0, range.length() - 1);
+                        botRange = Double.parseDouble(botRange_);
+                        //Turn everything before the - into a double
+                        upRange = 100000000;
+                    } else {
+                        //Else split the string into two parts seperated by the -
+                        //Convert the two strings into doubles
+                        String arrayRange[] = range.split("-");
+                        botRange = Double.parseDouble(arrayRange[0]);
+                        upRange = Double.parseDouble(arrayRange[1]);
+                        //Assign the first number as the bottom value and the second one as top
+                    }
+                }
+
+                for (int i = 0; i < investments.size(); i++) {
+                    //Loop through arraylist
+                    boolean rangeChecker = false;
+                    boolean symbolChecker = false;
+                    boolean keyWordChecker = false;
+                    //Create booleans for when a match is found
+                    if (symbolCheck) {
+                        if (symbol_.equals(investments.get(i).getSymbol()) == true) {
+                            symbolChecker = true;
+                        }
+                        //If the user entered an input for symbol and a match is found set symbolChecker to true
+                    }
+                    if (rangeCheck) {
+                        double holderPrice = investments.get(i).getPrice();
+                        if (holderPrice <= upRange && holderPrice >= botRange) {
+                            rangeChecker = true;
+                        }
+                        //If the user entered an input for range and match is found set rangeChecker to true
+                    }
+                    if (keyWordCheck) {
+                        //If the user entered an input for keywords and match is found set keyWordChecker to true
+                        boolean Match = false;
+                        boolean matchFinal = true;
+                        String keyWrds[] = keyWords.split("[,. ;:/]+");
+                        //Split the key words into single words
+                        
+                        //Split the name of the investment into words
+                        for (int x = 0; x < keyWrds.length; x++) {
+                            Match = false;
+                            ArrayList<Integer> list=investNames.get(keyWrds[x].toLowerCase());
+                            for (int k = 0; k < list.size(); k++) {
+                                if (list.get(k)==i) {
+                                    //If a match is found for the specific key word in the name of the investment set Match to true
+                                    Match = true;
+                                }
+                            }
+                            if (!Match) {
+                                //If no match is found for that key word set matchFinal to false
+                                matchFinal = false;
+                            }
+                        }
+                        if (matchFinal) {
+                            //If a match is found set keyWordChecker to true
+                            keyWordChecker = true;
+                        }
+                    }
+                    if (keyWordCheck == keyWordChecker && rangeCheck == rangeChecker && symbolCheck == symbolChecker) {
+                        investments.get(i).display();
+                        found=true;
+                        //If a match is found for the variables that were entered by the user then display
+                    }
+                }
+
+            if (!found)
+            {
+              //If no investment match the users search 
+              System.out.println("No investment were found");
+            }
+            }
+            if (input.equalsIgnoreCase("upload"))
+            {
+              String fileName;
+             
+                System.out.println("Please enter the name of the input file:");
+                fileName = sc.nextLine();
+                Scanner inputStream = null;
+                //Create input scanner
+                try {
+                    inputStream = new Scanner(new FileInputStream(fileName));
+                    //Open stream to file
+                } catch (FileNotFoundException e) {
+                    System.out.println("File could not be found or opened\n");
+                    System.exit(0);
+                    //If file was not found give an error and exit
+                }
+                 while (inputStream.hasNextLine()) {
+                    //While there is still text in the file
+                    String type;
+                    type = inputStream.nextLine();
+                    if (type.isEmpty())
+                    {
+                      type = inputStream.nextLine();
+                    }
+                    String[] arrOfStr1 = type.split("“|”");
+                    //Get each line and split it into sub strings at every space
+                    if (arrOfStr1[1].equalsIgnoreCase("stock"))
+                    {
+                    Stock temp = new Stock();
+                    
+                    String symbol_;
+                    symbol_ = inputStream.nextLine();
+                    String[] arrOfStr2 = symbol_.split("“|”");
+                    temp.setSymbol(arrOfStr2[1]);
+
+                    String name_;
+                    name_ = inputStream.nextLine();
+                    String[] arrOfStr3 = name_.split("“|”");
+                    temp.setName(arrOfStr3[1]);
+
+                    String quantity_;
+                    quantity_ = inputStream.nextLine();
+                    String[] arrOfStr4 = quantity_.split("“|”");
+                    temp.setAmnt(Integer.parseInt(arrOfStr4[1]));
+
+                    String price_;
+                    price_ = inputStream.nextLine();
+                    String[] arrOfStr5 = price_.split("“|”");
+                    temp.setPrice(Double.parseDouble(arrOfStr5[1]));
+
+                    String bookValue_;
+                    bookValue_ = inputStream.nextLine();
+                    String[] arrOfStr6 = bookValue_.split("“|”");
+                    temp.newBookVal(Double.parseDouble(arrOfStr6[1]));
+                    String Name;
+                    Name=temp.getName();
+                    String[] parts = Name.split("[,. ;:/]+");
+                    for (int i=0;i<parts.length;i++)
+                        {
+                          String partsLow=parts[i].toLowerCase();
+                          if (investNames.containsKey(partsLow))
+                          {
+                            ArrayList<Integer> list=investNames.get(partsLow);
+                            list.add(investments.size());
+                            investNames.put(partsLow,list);
+                          }
+                          else
+                          {
+                          investNames.put(partsLow,new ArrayList<Integer>()); 
+                          ArrayList<Integer> list=investNames.get(partsLow); 
+                          list.add(investments.size()); 
+                          investNames.put(partsLow,list); 
+                          }
+                          
+                        }
+                    investments.add(temp);
+                    }
+                     if (arrOfStr1[1].equalsIgnoreCase("mutualfund"))
+                    {
+                    mutualFund temp = new mutualFund();
+                    
+                    String symbol_;
+                    symbol_ = inputStream.nextLine();
+                    String[] arrOfStr2 = symbol_.split("“|”");
+                    temp.setSymbol(arrOfStr2[1]);
+
+                    String name_;
+                    name_ = inputStream.nextLine();
+                    String[] arrOfStr3 = name_.split("“|”");
+                    temp.setName(arrOfStr3[1]);
+
+                    String quantity_;
+                    quantity_ = inputStream.nextLine();
+                    String[] arrOfStr4 = quantity_.split("“|”");
+                    temp.setAmnt(Integer.parseInt(arrOfStr4[1]));
+
+                    String price_;
+                    price_ = inputStream.nextLine();
+                    String[] arrOfStr5 = price_.split("“|”");
+                    temp.setPrice(Double.parseDouble(arrOfStr5[1]));
+
+                    String bookValue_;
+                    bookValue_ = inputStream.nextLine();
+                    String[] arrOfStr6 = bookValue_.split("“|”");
+                    temp.newBookVal(Double.parseDouble(arrOfStr6[1]));
+                    String Name;
+                    Name=temp.getName();
+                    String[] parts = Name.split("[,. ;:/]+");
+                    for (int i=0;i<parts.length;i++)
+                        {
+                          String partsLow=parts[i].toLowerCase();
+                          if (investNames.containsKey(partsLow))
+                          {
+                            ArrayList<Integer> list=investNames.get(partsLow);
+                            list.add(investments.size());
+                            investNames.put(partsLow,list);
+                          }
+                          else
+                          {
+                          investNames.put(partsLow,new ArrayList<Integer>()); 
+                          ArrayList<Integer> list=investNames.get(partsLow); 
+                          list.add(investments.size()); 
+                          investNames.put(partsLow,list); 
+                          }
+                          
+                        }
+                    investments.add(temp);
+                    }
+                    }
+                //Close file
+                inputStream.close();
+                }
+                if (input.equalsIgnoreCase("download"))
+            {
+              String fileName;
+                System.out.println("Please enter the name of the output file:");
+                fileName = sc.nextLine();
+                //Ask user for file name
+                PrintWriter outputStream = null;
+                //Intialize output stream
+                try {
+                    outputStream = new PrintWriter(new FileOutputStream(fileName));
+                    //Open output stream
+                } catch (FileNotFoundException e) {
+                    System.out.println("File could not be found or opened\n");
+                    System.exit(0);
+                    //If file was not found give an error and exit
+                }
+                for (int i = 0; i < investments.size(); i++) {
+                    outputStream.println(investments.get(i).fileOutput());
+                    //Call file out put method for each element
+                    //Display the string retruned but the method
+                }
+                outputStream.close();
+                //Close the file
+                
+            }
+
+        
+ //System.out.println(investNames);
+    }
+    //System.out.println(investNames);
+    }
+}
